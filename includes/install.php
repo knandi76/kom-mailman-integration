@@ -1,5 +1,5 @@
 <?php
-namespace kom_mailman_integration {
+
 
 	/*******************************************
 	 * GNU-Mailman Installation Functions
@@ -20,4 +20,4 @@ namespace kom_mailman_integration {
 	}
 
 	register_activation_hook( KM_PLUGIN_FILE, __NAMESPACE__ . '\\gm_options_install' );
-}
+

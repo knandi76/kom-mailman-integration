@@ -1,6 +1,6 @@
 <?php
 
-namespace kom_mailman_integration {
+
 	/*******************************************
 	 * GNU-Mailman Automatic Functions
 	 *******************************************/
@@ -40,4 +40,4 @@ namespace kom_mailman_integration {
 	}
 
 	add_action( 'delete_user', __NAMESPACE__ . '\\gm_on_delete' );
-}
+

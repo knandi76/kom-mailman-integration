@@ -1,6 +1,6 @@
 <?php
 
-namespace kom_mailman_integration {
+
 	/**
 	 * GNU WordPress Mailman Integration
 	 *
@@ -56,4 +56,3 @@ namespace kom_mailman_integration {
 		require_once( KM_PLUGIN_DIR . 'includes/admin/mailing-lists-page.php' );
 		require_once( KM_PLUGIN_DIR . 'includes/admin/admin-page.php' );
 	}
-}

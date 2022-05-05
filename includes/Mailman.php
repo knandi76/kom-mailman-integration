@@ -1,6 +1,6 @@
 <?php
 
-namespace kom_mailman_integration {
+
 	/**
 	 * GNU-Mailman Integration
 	 *
@@ -400,4 +400,4 @@ namespace kom_mailman_integration {
 			return $this->_fullName;
 		}
 	}
-}
+

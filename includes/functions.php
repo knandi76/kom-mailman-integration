@@ -1,5 +1,5 @@
 <?php
-namespace kom_mailman_integration {
+
 	/**
 	 * @package GM\Functions
 	 */
@@ -32,7 +32,7 @@ namespace kom_mailman_integration {
 	 */
 	function gm_get_mailing_lists() {
 		$list_array = maybe_unserialize( get_site_option( 'gnumailman_lists' ) );
-		if ( false === is_array( $list_array ) ) {
+		if ( ! is_array( $list_array ) ) {
 			return array();
 		} else {
 			// Check to ensure each mailing list has a unique id.
@@ -71,11 +71,11 @@ namespace kom_mailman_integration {
 	 * @since   1.0.0
 	 */
 	function gm_set_mailing_lists( $list_array ) {
-		if ( false === is_array( $list_array ) ) {
+		if ( ! is_array( $list_array ) ) {
 			wp_die( '$listArray is NOT a valid array' );
 		}
 
-		return update_site_option( 'gnumailman_lists', serialize( $list_array ) );
+		return update_site_option( 'gnumailman_lists', $list_array );
 	}
 
 	/**
@@ -111,7 +111,7 @@ namespace kom_mailman_integration {
 			$user_id = get_current_user_id();
 		}
 
-		$current_subscriptions = maybe_unserialize( get_user_meta( $user_id, 'gm_subscriptions' ) );
+		$current_subscriptions = get_user_meta(  $user_id, 'gm_subscriptions', true );
 
 		// Check users subscriptions against active mailing list...list.
 		$mailing_lists    = gm_get_mailing_lists();
@@ -122,7 +122,7 @@ namespace kom_mailman_integration {
 
 		$data_stale = false;
 		foreach ( $current_subscriptions as $key => $list_id ) {
-			if ( false === in_array( $list_id, $mailing_list_ids ) ) {
+			if ( ! in_array( $list_id, $mailing_list_ids , false ) ) {
 				$data_stale = true;
 				unset( $current_subscriptions[ $key ] );
 			}
@@ -131,14 +131,14 @@ namespace kom_mailman_integration {
 		// Data is stale, need to update user's meta.
 		if ( true === $data_stale ) {
 			// Update User Metadata.
-			update_user_meta( $user_id, 'gm_subscriptions', serialize( $current_subscriptions ) );
+			update_user_meta( $user_id, 'gm_subscriptions', $current_subscriptions );
 		}
 
 		$last_update = get_user_meta( $user_id, 'gm_last_update', true );
-		if ( ( time() - gm_get_update_frequency() ) > $last_update ) {
+		//if ( ( time() - gm_get_update_frequency() ) > $last_update ) {
 			// Cache time expired...Need to Update!
 			$current_subscriptions = gm_update_user_subscriptions( $user_id );
-		}
+		//}
 
 		return $current_subscriptions;
 	}
@@ -179,7 +179,7 @@ namespace kom_mailman_integration {
 		}
 
 		// Update User Metadata.
-		update_user_meta( $user_id, 'gm_subscriptions', serialize( $current_subscriptions ) );
+		update_user_meta( $user_id, 'gm_subscriptions',  $current_subscriptions );
 
 		// Don't last update if there was a connection failure!
 		if ( ! $connection_failed ) {
@@ -210,12 +210,19 @@ namespace kom_mailman_integration {
 
 
 		if ( $status ) {
-			$current_subscriptions   = maybe_unserialize( get_user_meta( $user_id, 'gm_subscriptions' ) );
+			$current_subscriptions   = get_user_meta( $user_id, 'gm_subscriptions', true  );
+
+			if (empty($current_subscriptions) || !is_array($current_subscriptions)) {
+				$current_subscriptions = Array();
+			}
 			$current_subscriptions[] = $list_id;
-			update_user_meta( $user_id, 'gm_subscriptions', serialize( $current_subscriptions ) );
+			$current_subscriptions = array_unique($current_subscriptions);
+			update_user_meta( $user_id, 'gm_subscriptions',  $current_subscriptions );
+
 
 			return true;
 		}
+
 
 		return false;
 	}
@@ -258,12 +265,12 @@ namespace kom_mailman_integration {
 		$status = gm_unsubscribe( $list_id, $user->user_email );
 
 		if ( $status ) {
-			$current_subscriptions = maybe_unserialize( get_user_meta( $user_id, 'gm_subscriptions', true ) );
+			$current_subscriptions = get_user_meta( $user_id, 'gm_subscriptions', true ) ;
 
 			$key = array_search( $list_id, $current_subscriptions );
 			unset( $current_subscriptions[ $key ] );
 
-			update_user_meta( $user_id, 'gm_subscriptions', serialize( $current_subscriptions ) );
+			update_user_meta( $user_id, 'gm_subscriptions',  $current_subscriptions );
 
 			return true;
 		}
@@ -312,4 +319,3 @@ namespace kom_mailman_integration {
 	function gm_create_unique_id() {
 		return md5( uniqid( mt_rand(), true ) );
 	}
-}
